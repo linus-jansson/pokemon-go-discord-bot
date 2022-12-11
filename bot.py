@@ -23,4 +23,11 @@ async def on_ready():
 async def hello(ctx):
     await ctx.respond("Hello!")
 
+@bot.slash_command(guild_ids=[583235725948878858], description="Set your pokemon go level")
+async def setlevel(ctx, level: discord.Option(int, "Your level", min_value=1, max_value=50, required=True)):
+    print(ctx.author, level)
+    
+    await ctx.author.edit(nick=f"{ctx.author.name} | Lvl {level}")
+    await ctx.respond(f"I set your level to {level}")
+
 bot.run(os.environ["BOT_TOKEN"])
