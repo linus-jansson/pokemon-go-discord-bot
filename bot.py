@@ -77,7 +77,6 @@ async def setlevel(ctx, level: discord.Option(int, "Your level", min_value=1, ma
 
 @bot.slash_command(guild_ids=[583235725948878858], description="Test message")
 async def test(ctx, raidboss: discord.Option(str, "Raid boss", required=True, choices=currentRaidBosses), usercode: discord.Option(int, "User code", required=True)):
-    await ctx.respond(f"{ctx.author.mention} hosted a raid")
 
     usercode = updateUserCode(usercode) # Formatted usercode for adding the host
     embed = discord.Embed(title=f"A raid has been spotted!", description=f"React with the emotes below to join the raid!", color=discord.Color.green())
@@ -88,7 +87,7 @@ async def test(ctx, raidboss: discord.Option(str, "Raid boss", required=True, ch
     bossID = getRaidBossID(raidboss)
     embed.set_thumbnail(url=f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{bossID}.png")
 
-    msg = await ctx.send(embed=embed)
+    msg = await ctx.send(f"{ctx.author.mention} hosted a raid", embed=embed)
     await msg.add_reaction("👍")
 
 
