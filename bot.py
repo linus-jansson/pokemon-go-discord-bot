@@ -16,7 +16,8 @@ logger.addHandler(handler)
 bot = discord.Bot()
 
 # Fake boss data (Get from some API later or update manually?)
-currentRaidBosses = [ 
+
+currentRaidBosses = [
     "Articuno",
     "Zapdos",
     "Moltres",
@@ -30,8 +31,22 @@ currentRaidBosses = [
     "Celebi",
     "Regirock",
     "Regice",
-    "Registeel",
-    "Latias",
+]
+
+currentRaidBossesInformation = [ 
+    {"name": "Articuno", "id": 144},
+    {"name": "Zapdos", "id": 145},
+    {"name": "Moltres", "id": 146},
+    {"name": "Mewtwo", "id": 150},
+    {"name": "Mew", "id": 151},
+    {"name": "Raikou", "id": 243},
+    {"name": "Entei", "id": 244},
+    {"name": "Suicune", "id": 245},
+    {"name": "Lugia", "id": 249},
+    {"name": "Ho-Oh", "id": 250},
+    {"name": "Celebi", "id": 251},
+    {"name": "Regirock", "id": 377},
+    {"name": "Regice", "id": 378},
 ]
 
 def updateUserCode(usercode, N=4, K=' '): # Github co-pilot stuff, do not ask me how it works :D (Written by co-pilot)
@@ -39,6 +54,11 @@ def updateUserCode(usercode, N=4, K=' '): # Github co-pilot stuff, do not ask me
     for i in range(0, len(str(usercode)), N):
         result.append(str(usercode)[i:i+N])
     return K.join(result)
+
+def getRaidBossID(raidboss):
+    for boss in currentRaidBossesInformation:
+        if boss.get("name") == raidboss:
+            return boss.get("id")
 
 @bot.event
 async def on_ready():
@@ -57,11 +77,15 @@ async def setlevel(ctx, level: discord.Option(int, "Your level", min_value=1, ma
 
 @bot.slash_command(guild_ids=[583235725948878858], description="Test message")
 async def test(ctx, raidboss: discord.Option(str, "Raid boss", required=True, choices=currentRaidBosses), usercode: discord.Option(int, "User code", required=True)):
-    usercode = updateUserCode(usercode)
-    embed = discord.Embed(title=f"Raid has been hosted by {ctx.author.name}", description=f"Add user with the code: {usercode}", color=discord.Color.green())
+    usercode = updateUserCode(usercode) # Formatted usercode for adding the host
+    embed = discord.Embed(title=f"A raid has been spotted!", description=f"React with the emotes below to join the raid!", color=discord.Color.green())
     embed.add_field(name="Raid boss", value=f"{raidboss}")
-    embed.set_image(url="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/145.png")
+    embed.add_field(name="Host", value=f"{ctx.author.mention}")
+    embed.add_field(name="Roles", value=f"{raidboss} @Articuno", inline=False)
 
-    await ctx.send(embed=embed)
+    bossID = getRaidBossID(raidboss)
+    embed.set_thumbnail(url=f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{bossID}.png")
+
+    await ctx.respond(embed=embed)
 
 bot.run(os.environ["BOT_TOKEN"])
