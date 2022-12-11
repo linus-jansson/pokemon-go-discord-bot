@@ -60,7 +60,7 @@ async def test(ctx, raidboss: discord.Option(str, "Raid boss", required=True, ch
     usercode = updateUserCode(usercode)
     embed = discord.Embed(title=f"Raid has been hosted by {ctx.author.name}", description=f"Add user with the code: {usercode}", color=discord.Color.green())
     embed.add_field(name="Raid boss", value=f"{raidboss}")
-    embed.set_image(url="https://assets-prd.ignimgs.com/2022/08/24/flying-pikachu-thumb-1661363756114.png")
+    embed.set_image(url="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/145.png")
 
     await ctx.send(embed=embed)
 
