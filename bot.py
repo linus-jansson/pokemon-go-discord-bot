@@ -28,6 +28,6 @@ async def setlevel(ctx, level: discord.Option(int, "Your level", min_value=1, ma
     print(ctx.author, level)
     
     await ctx.author.edit(nick=f"{ctx.author.name} | Lvl {level}")
-    await ctx.respond(f"I set your level to {level}")
+    await ctx.respond(f"{ctx.author.mention} I set your level to {level}")
 
 bot.run(os.environ["BOT_TOKEN"])
