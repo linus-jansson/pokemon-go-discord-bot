@@ -26,9 +26,8 @@ async def hello(ctx):
 @bot.slash_command(guild_ids=[583235725948878858], description="Set your pokemon go level")
 async def setlevel(ctx, level: discord.Option(int, "Your level", min_value=1, max_value=50, required=True)):
     print(ctx.author, level)
-    try:
-        await ctx.author.edit(nick=f"{ctx.author.name} | Lvl {level}")
-    except discord.Forbidden:
-        await ctx.respond("I don't have permission to change your nickname")
+    
+    await ctx.author.edit(nick=f"{ctx.author.name} | Lvl {level}")
+    await ctx.respond(f"I set your level to {level}")
 
 bot.run(os.environ["BOT_TOKEN"])
