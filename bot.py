@@ -87,8 +87,7 @@ async def test(ctx, raidboss: discord.Option(str, "Raid boss", required=True, ch
     bossID = getRaidBossID(raidboss)
     embed.set_thumbnail(url=f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{bossID}.png")
 
-    msg = await ctx.send(f"{ctx.author.mention} hosted a raid", embed=embed)
-    await msg.add_reaction("👍")
+    await ctx.respond(f"{ctx.author.mention} hosted a raid", embed=embed)
 
 
 bot.run(os.environ["BOT_TOKEN"])
