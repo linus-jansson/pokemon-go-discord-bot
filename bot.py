@@ -123,10 +123,20 @@ async def hostraid(ctx, raidboss: discord.Option(str, "Raid boss", required=True
     await ctx.respond(f"{ctx.author.mention} hosted a raid", embed=embed)
 
     # Creates the raid channel
-    curRaid = await ctx.guild.create_text_channel(f"{raidboss}-raid-" + generateRandomCode())
-    await curRaid.send(f"{ctx.author.mention} hosted a raid", embed=embed)
+    chatRoleName = f"{raidboss}-raid-" + generateRandomCode()
+    await ctx.guild.create_role(name=chatRoleName, mentionable=False)
+    role = discord.utils.get(ctx.guild.roles, name=chatRoleName)
+    await ctx.author.add_roles(role)
+
+    overwrites = {
+        ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+        role: discord.PermissionOverwrite(read_messages=True)
+    }
+
+    curRaid = await ctx.guild.create_text_channel(chatRoleName, overwrites=overwrites)
+    await curRaid.send(f"{ctx.author.mention} hosted a raid")
     currentRaids.append(curRaid)
-    print(currentRaids)
+
 
 
 bot.run(os.environ["BOT_TOKEN"])
