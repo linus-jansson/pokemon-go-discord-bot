@@ -145,7 +145,7 @@ async def hostraid(ctx, raidboss: discord.Option(str, "Raid boss", required=True
     await ctx.author.add_roles(role)
 
     with open("botroles.csv", "a") as f:
-        f.write(f"{chatRoleName}")
+        f.write(f"{chatRoleName}" + ",")
 
     # Specifies the permissions for the raid chat
     overwrites = {
