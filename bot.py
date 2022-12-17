@@ -78,6 +78,22 @@ def generateRandomCode():
 async def on_ready():
     print(f"We have logged in as {bot.user}")
 
+@bot.slash_command(guild_ids=[583235725948878858], description="Remove raid boss roles and channels")
+async def removeroles(ctx):
+    with open("botroles.csv" , "r") as file:
+        for line in file:
+            print(line)
+            channel = discord.utils.get(ctx.guild.channels, name=line)
+            print(channel)
+            print("will delete channel")
+            if channel:
+                print("should delete channel")
+                await channel.delete()
+            else:
+                print("channel not found")
+    
+    await ctx.respond("Removed all raid boss roles and channels")
+
 @bot.slash_command(guild_ids=[583235725948878858])
 async def hello(ctx):
     await ctx.respond("Hello!")
@@ -128,6 +144,9 @@ async def hostraid(ctx, raidboss: discord.Option(str, "Raid boss", required=True
     role = discord.utils.get(ctx.guild.roles, name=chatRoleName)
     await ctx.author.add_roles(role)
 
+    with open("botroles.csv", "a") as f:
+        f.write(f"{chatRoleName}")
+
     # Specifies the permissions for the raid chat
     overwrites = {
         ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
@@ -138,7 +157,5 @@ async def hostraid(ctx, raidboss: discord.Option(str, "Raid boss", required=True
     curRaid = await ctx.guild.create_text_channel(chatRoleName, overwrites=overwrites)
     await curRaid.send(f"{ctx.author.mention} hosted a raid")
     currentRaids.append(curRaid)
-
-
 
 bot.run(os.environ["BOT_TOKEN"])
