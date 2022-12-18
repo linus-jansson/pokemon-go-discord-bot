@@ -141,6 +141,26 @@ async def hostraid(ctx, raidboss: discord.Option(str, "Raid boss", required=True
     # Formatted usercode for adding the host
     usercode = updateUserCode(usercode) 
 
+    # Generates role and channel for raid chat
+    chatRoleName = f"{raidboss.lower()}-raid-" + generateRandomCode()
+    await ctx.guild.create_role(name=chatRoleName, mentionable=False)
+    role = discord.utils.get(ctx.guild.roles, name=chatRoleName)
+    await ctx.author.add_roles(role)
+
+    with open("botroles.csv", "a", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow([chatRoleName])
+
+    # Specifies the permissions for the raid chat
+    overwrites = {
+        ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+        role: discord.PermissionOverwrite(read_messages=True)
+    }
+
+    # Creates the raid chat and sends a message including who hosted the raid
+    curRaid = await ctx.guild.create_text_channel(chatRoleName, overwrites=overwrites)
+    await curRaid.send(f"{ctx.author.mention} hosted a raid")
+
     # Creates the embedded raid message then adds raid boss name and the host
     embed = discord.Embed(title=f"A raid has been spotted!", color=discord.Color.green())
     embed.add_field(name="Raid boss", value=f"{raidboss}")
@@ -167,25 +187,5 @@ async def hostraid(ctx, raidboss: discord.Option(str, "Raid boss", required=True
 
     # Responds with the raid message
     await ctx.respond(f"{ctx.author.mention} hosted a raid", embed=embed, view=joinButton())
-
-    # Generates role and channel for raid chat
-    chatRoleName = f"{raidboss.lower()}-raid-" + generateRandomCode()
-    await ctx.guild.create_role(name=chatRoleName, mentionable=False)
-    role = discord.utils.get(ctx.guild.roles, name=chatRoleName)
-    await ctx.author.add_roles(role)
-
-    with open("botroles.csv", "a", newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow([chatRoleName])
-
-    # Specifies the permissions for the raid chat
-    overwrites = {
-        ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-        role: discord.PermissionOverwrite(read_messages=True)
-    }
-
-    # Creates the raid chat and sends a message including who hosted the raid
-    curRaid = await ctx.guild.create_text_channel(chatRoleName, overwrites=overwrites)
-    await curRaid.send(f"{ctx.author.mention} hosted a raid")
 
 bot.run(os.environ["BOT_TOKEN"])
