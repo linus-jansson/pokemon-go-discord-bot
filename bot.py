@@ -80,6 +80,15 @@ def generateRandomCode():
 
 ############################################
 
+class joinButton(discord.ui.View):
+    @discord.ui.button(label="Remote", style=discord.ButtonStyle.green)
+    async def join(self, button, interaction):
+        await interaction.response.send_message(f"{interaction.user.mention}, a remote player joined the raid!")
+
+    @discord.ui.button(label="Local", style=discord.ButtonStyle.green)
+    async def join(self, button, interaction):
+        await interaction.response.send_message(f"{interaction.user.mention}, a local player joined the raid!")
+
 @bot.event
 async def on_ready():
     print(f"We have logged in as {bot.user}")
@@ -157,7 +166,7 @@ async def hostraid(ctx, raidboss: discord.Option(str, "Raid boss", required=True
     embed.set_thumbnail(url=f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{bossID}.png")
 
     # Responds with the raid message
-    await ctx.respond(f"{ctx.author.mention} hosted a raid", embed=embed)
+    await ctx.respond(f"{ctx.author.mention} hosted a raid", embed=embed, view=joinButton())
 
     # Generates role and channel for raid chat
     chatRoleName = f"{raidboss.lower()}-raid-" + generateRandomCode()
