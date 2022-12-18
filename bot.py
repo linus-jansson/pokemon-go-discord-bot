@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import logging
 import random
 
+import csv
+
 load_dotenv()
 
 logger = logging.getLogger('discord')
@@ -50,8 +52,6 @@ currentRaidBossesInformation = [
     {"name": "Regice", "id": 378},
 ]
 
-currentRaids = []
-
 # Github co-pilot stuff, do not ask me how it works :D (Written by co-pilot)
 def updateUserCode(usercode, N=4, K=' '): 
     result = []
@@ -74,30 +74,50 @@ def generateRandomCode():
             x += 1
         return code
 
+############################################
+
+# Discord specific stuff
+
+############################################
+
 @bot.event
 async def on_ready():
     print(f"We have logged in as {bot.user}")
-
+ 
+# Temporary removal of all raid channels and roles when testing
 @bot.slash_command(guild_ids=[583235725948878858], description="Remove raid boss roles and channels")
 async def removeroles(ctx):
     with open("botroles.csv" , "r") as file:
-        for line in file:
-            print(line)
-            channel = discord.utils.get(ctx.guild.channels, name=line)
-            print(channel)
-            print("will delete channel")
-            if channel:
-                print("should delete channel")
-                await channel.delete()
+        reader = csv.reader(file)
+        for row in reader:
+            name = row[0]
+            
+            role = discord.utils.get(ctx.guild.roles, name=name)
+            channel = discord.utils.get(ctx.guild.text_channels, name=name)
+            
+            if role:
+                await role.delete()
+                print(f"Deleted role {role}")
             else:
-                print("channel not found")
+                print(f"Role {role} does not exist")
+
+            if channel:
+                await channel.delete()
+                print(f"Deleted channel {channel}")
+            else:
+                print(f"Channel {channel} does not exist")
     
+    f = open("botroles.csv", "w+")
+    f.close()
+            
     await ctx.respond("Removed all raid boss roles and channels")
 
+# Test
 @bot.slash_command(guild_ids=[583235725948878858])
 async def hello(ctx):
     await ctx.respond("Hello!")
 
+# Sets the user level (Is not saved yet)
 @bot.slash_command(guild_ids=[583235725948878858], description="Set your pokemon go level")
 async def setlevel(ctx, level: discord.Option(int, "Your level", min_value=1, max_value=50, required=True)):
     print(ctx.author, level)
@@ -105,7 +125,8 @@ async def setlevel(ctx, level: discord.Option(int, "Your level", min_value=1, ma
     await ctx.author.edit(nick=f"{ctx.author.name} | Lvl {level}")
     await ctx.respond(f"{ctx.author.mention} I set your level to {level}")
 
-@bot.slash_command(guild_ids=[583235725948878858], description="Test message")
+# Hosts a raid
+@bot.slash_command(guild_ids=[583235725948878858], description="Host a raid")
 async def hostraid(ctx, raidboss: discord.Option(str, "Raid boss", required=True, choices=currentRaidBosses), usercode: discord.Option(int, "User code", required=True), weatherboost: discord.Option(bool, "Weather boosted", required=False)):
 
     # Formatted usercode for adding the host
@@ -139,13 +160,14 @@ async def hostraid(ctx, raidboss: discord.Option(str, "Raid boss", required=True
     await ctx.respond(f"{ctx.author.mention} hosted a raid", embed=embed)
 
     # Generates role and channel for raid chat
-    chatRoleName = f"{raidboss}-raid-" + generateRandomCode()
+    chatRoleName = f"{raidboss.lower()}-raid-" + generateRandomCode()
     await ctx.guild.create_role(name=chatRoleName, mentionable=False)
     role = discord.utils.get(ctx.guild.roles, name=chatRoleName)
     await ctx.author.add_roles(role)
 
-    with open("botroles.csv", "a") as f:
-        f.write(f"{chatRoleName}" + ",")
+    with open("botroles.csv", "a", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow([chatRoleName])
 
     # Specifies the permissions for the raid chat
     overwrites = {
@@ -156,6 +178,5 @@ async def hostraid(ctx, raidboss: discord.Option(str, "Raid boss", required=True
     # Creates the raid chat and sends a message including who hosted the raid
     curRaid = await ctx.guild.create_text_channel(chatRoleName, overwrites=overwrites)
     await curRaid.send(f"{ctx.author.mention} hosted a raid")
-    currentRaids.append(curRaid)
 
 bot.run(os.environ["BOT_TOKEN"])
