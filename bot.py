@@ -82,11 +82,11 @@ def generateRandomCode():
 
 class joinButton(discord.ui.View):
     @discord.ui.button(label="Remote", style=discord.ButtonStyle.green)
-    async def join(self, button, interaction):
+    async def joinRemote(self, button, interaction):
         await interaction.response.send_message(f"{interaction.user.mention}, a remote player joined the raid!")
 
     @discord.ui.button(label="Local", style=discord.ButtonStyle.green)
-    async def join(self, button, interaction):
+    async def joinLocal(self, button, interaction):
         await interaction.response.send_message(f"{interaction.user.mention}, a local player joined the raid!")
 
 @bot.event
