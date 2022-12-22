@@ -85,21 +85,35 @@ class joinButton(discord.ui.View):
         super().__init__()
         self.chatRoleName = chatRoleName
 
+        self.slots = 20
+        self.remoteSlots = 6
+
     @discord.ui.button(label="Remote", style=discord.ButtonStyle.green)
     async def joinRemote(self, button, interaction):
-        channel = discord.utils.get(interaction.guild.text_channels, name=self.chatRoleName)
-        await channel.send(f"{interaction.user.mention}, a remote player joined the raid!")
-        user = interaction.user
-        await user.add_roles(discord.utils.get(interaction.guild.roles, name=self.chatRoleName))
-        await interaction.response.send_message("You joined the raid as a remote player!", ephemeral=True)
+        if self.remoteSlots == 0:
+            await interaction.response.send_message("There are no more remote slots available!", ephemeral=True)
+        elif self.slots == 0:
+            await interaction.response.send_message("There are no more slots available!", ephemeral=True)
+        else:
+            self.remoteSlots -= 1
+            self.slots -= 1
+            channel = discord.utils.get(interaction.guild.text_channels, name=self.chatRoleName)
+            await channel.send(f"{interaction.user.mention}, a remote player joined the raid!")
+            user = interaction.user
+            await user.add_roles(discord.utils.get(interaction.guild.roles, name=self.chatRoleName))
+            await interaction.response.send_message(f"You joined the raid as a remote player! Remote slots left: {self.remoteSlots} Total slots left: {self.slots}" , ephemeral=True)
 
     @discord.ui.button(label="Local", style=discord.ButtonStyle.green)
     async def joinLocal(self, button, interaction):
-        channel = discord.utils.get(interaction.guild.text_channels, name=self.chatRoleName)
-        await channel.send(f"{interaction.user.mention}, a local player joined the raid!")
-        user = interaction.user
-        await user.add_roles(discord.utils.get(interaction.guild.roles, name=self.chatRoleName))
-        await interaction.response.send_message("You joined the raid as a local player!", ephemeral=True)
+        if self.slots == 0:
+            await interaction.response.send_message("There are no more slots available!", ephemeral=True)
+        else:
+            self.slots -= 1
+            channel = discord.utils.get(interaction.guild.text_channels, name=self.chatRoleName)
+            await channel.send(f"{interaction.user.mention}, a local player joined the raid!")
+            user = interaction.user
+            await user.add_roles(discord.utils.get(interaction.guild.roles, name=self.chatRoleName))
+            await interaction.response.send_message(f"You joined the raid as a local player! Total slots left {self.slots}", ephemeral=True)
 
 @bot.event
 async def on_ready():
