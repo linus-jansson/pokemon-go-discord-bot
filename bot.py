@@ -81,13 +81,25 @@ def generateRandomCode():
 ############################################
 
 class joinButton(discord.ui.View):
+    def __init__(self, chatRoleName):
+        super().__init__()
+        self.chatRoleName = chatRoleName
+
     @discord.ui.button(label="Remote", style=discord.ButtonStyle.green)
     async def joinRemote(self, button, interaction):
-        await interaction.response.send_message(f"{interaction.user.mention}, a remote player joined the raid!")
+        channel = discord.utils.get(interaction.guild.text_channels, name=self.chatRoleName)
+        await channel.send(f"{interaction.user.mention}, a remote player joined the raid!")
+        user = interaction.user
+        await user.add_roles(discord.utils.get(interaction.guild.roles, name=self.chatRoleName))
+        await interaction.response.send_message("You joined the raid as a remote player!", ephemeral=True)
 
     @discord.ui.button(label="Local", style=discord.ButtonStyle.green)
     async def joinLocal(self, button, interaction):
-        await interaction.response.send_message(f"{interaction.user.mention}, a local player joined the raid!")
+        channel = discord.utils.get(interaction.guild.text_channels, name=self.chatRoleName)
+        await channel.send(f"{interaction.user.mention}, a local player joined the raid!")
+        user = interaction.user
+        await user.add_roles(discord.utils.get(interaction.guild.roles, name=self.chatRoleName))
+        await interaction.response.send_message("You joined the raid as a local player!", ephemeral=True)
 
 @bot.event
 async def on_ready():
@@ -159,7 +171,7 @@ async def hostraid(ctx, raidboss: discord.Option(str, "Raid boss", required=True
 
     # Creates the raid chat and sends a message including who hosted the raid
     curRaid = await ctx.guild.create_text_channel(chatRoleName, overwrites=overwrites)
-    await curRaid.send(f"{ctx.author.mention} hosted a raid")
+    await curRaid.send(f"{ctx.author.mention} hosted a raid, add the user with code: " + usercode)
 
     # Creates the embedded raid message then adds raid boss name and the host
     embed = discord.Embed(title=f"A raid has been spotted!", color=discord.Color.green())
@@ -186,6 +198,6 @@ async def hostraid(ctx, raidboss: discord.Option(str, "Raid boss", required=True
     embed.set_thumbnail(url=f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{bossID}.png")
 
     # Responds with the raid message
-    await ctx.respond(f"{ctx.author.mention} hosted a raid", embed=embed, view=joinButton())
+    await ctx.respond(f"{ctx.author.mention} hosted a raid", embed=embed, view=joinButton(chatRoleName))
 
 bot.run(os.environ["BOT_TOKEN"])
